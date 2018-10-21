@@ -1,0 +1,46 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using VRStandardAssets.Utils;
+
+public class WinRestartMenu : MonoBehaviour {
+	private VRInteractiveItem gaze;
+	private int secondsToHold = 1;
+	private Renderer rend;
+	private Color oldColor;
+	public Win win;
+	private float timeEntered;
+
+	// Use this for initialization
+	void Start () {
+        rend = GetComponent<Renderer>();
+		oldColor = rend.material.GetColor("_Color");
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		if(gaze.IsOver && Time.time > timeEntered + secondsToHold) {
+			win.RestartGame();
+		}
+		else if(gaze.IsOver) {			
+			float timeUntilSelected = (secondsToHold - (Time.time - timeEntered))/secondsToHold;
+			timeUntilSelected*=255;
+			Color newColor = new Color(oldColor.r * 255/timeUntilSelected, oldColor.g * timeUntilSelected/255, oldColor.b * timeUntilSelected/255);
+			rend.material.SetColor("_Color", newColor);
+		}
+	}	
+
+	private void OnEnable() {
+		gaze = GetComponent<VRInteractiveItem>();
+		gaze.OnOver += HandleOver;
+		gaze.OnOut += HandleOut;
+	}
+
+	void HandleOver() {
+		timeEntered = Time.time;
+	}
+
+	void HandleOut() {
+		rend.material.SetColor("_Color", oldColor);
+	}
+}
